@@ -51,6 +51,7 @@ class Store(db.Model, SerializerMixin):
 # Define PaymentStatus Enum
 class PaymentStatus(Enum):
     NOT_PAID = 'Not Paid'
+    
     PAID = 'Paid'
 
 
