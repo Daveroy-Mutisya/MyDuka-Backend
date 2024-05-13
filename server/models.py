@@ -80,6 +80,8 @@ class Payment(db.Model, SerializerMixin):
     method = db.Column(db.String)
     due_date = db.Column(db.Date, nullable=False)
 
+
+# 
 class Request(db.Model, SerializerMixin): 
     __tablename__ = 'requests'
     id = db.Column(db.Integer, primary_key=True)
@@ -99,7 +101,3 @@ class Request(db.Model, SerializerMixin):
     
 
 
-# This defines the roles of the merchant, admins and clerk
-class Role(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), unique=True, nullable=False)
