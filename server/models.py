@@ -19,7 +19,6 @@ class User(db.Model):
     # Provide a default value for the entries column
     entries = db.Column(db.Integer, default=0, nullable=False)
 
-
     @validates('email')
     def validate_email(self, key, email):
         assert '@' in email
@@ -36,11 +35,8 @@ class User(db.Model):
         return password
 
     def __repr__(self):
-        return f"<User {self.id}, {self.name},{self.role}, {self.email}, {self.password}>"
-   
+        return f"<User {self.id}, {self.username}, {self.role}, {self.email}, {self.password}>"
 
-
-# Define Product Model
 class Product(db.Model, SerializerMixin):
     __tablename__ = 'products'
     id = db.Column(db.Integer, primary_key=True)
@@ -52,41 +48,27 @@ class Product(db.Model, SerializerMixin):
     spoil_quantity = db.Column(db.Integer, nullable=False, default=0)
     buying_price = db.Column(db.Integer, nullable=False)
     selling_price = db.Column(db.Integer, nullable=False)
-
-    # Define the store_id foreign key without backref
     store_id = db.Column(db.Integer, db.ForeignKey('stores.id'), nullable=False)
-
-    # Define the relationship with backref
-    store = db.relationship('Store', back_populates='products')  # Adding back reference
+    store = db.relationship('Store', backref='products')  # Ensure correct back reference
 
     def __repr__(self):
         return f"Product(name='{self.name}', store_id='{self.store_id}')"
-
-
-
 
 class Store(db.Model):
     __tablename__ = 'stores'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(100), nullable=False)
-    
-    # Define user_id as a foreign key
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
-    # Define the relationship with the User model
     user = db.relationship('User', backref=db.backref('stores', lazy=True))
-
+    
     def __repr__(self):
         return f"Store(name='{self.name}')"
 
-# Define PaymentStatus Enum
 class PaymentStatus(Enum):
     NOT_PAID = 'Not Paid'
     PAID = 'Paid'
 
-
-# Define Payment Model
 class Payment(db.Model, SerializerMixin):
     __tablename__ = 'payments'
     id = db.Column(db.Integer, primary_key=True)
@@ -98,8 +80,6 @@ class Payment(db.Model, SerializerMixin):
     method = db.Column(db.String)
     due_date = db.Column(db.Date, nullable=False)
 
-
-# Define Request Model
 class Request(db.Model, SerializerMixin): 
     __tablename__ = 'requests'
     id = db.Column(db.Integer, primary_key=True)
