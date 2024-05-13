@@ -11,11 +11,14 @@ def main():
         User.query.delete()
         # Seeding users
         users = [
+
             User(username="Teddy Maina", email="mainateddy9@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image=""),
             User(username="Brian Murigi", email="brianmurigi19@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image=""), 
             User(username="Victor Leyian", email="leyianv360@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image=""),
             User(username="Ronnie Langat", email="ronnielangat2020@gmail.com", password=bcrypt.generate_password_hash("Admin1@pass").decode('utf-8'), role='admin', image=""),
             User(username="Dave Roy", email="daveroymutisya2@gmail.com", password=bcrypt.generate_password_hash("Merchant1@pass").decode('utf-8'), role='merchant', image="")
+
+
         ]
         db.session.add_all(users)
         db.session.commit()
@@ -23,9 +26,11 @@ def main():
         Store.query.delete()    
         # Seeding stores
         stores = [
+  
             Store(name="Quickmart", location="Kilimani", user_id=2),
             Store(name="Naivas", location="Thome", user_id=3),
             Store(name="Carefour", location="Karen", user_id=3)
+
         ]
         db.session.add_all(stores)
         db.session.commit() 
