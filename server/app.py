@@ -17,11 +17,11 @@ import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///myduka.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'j2D7Ku4aF8Rne2vdmefam    '  # Change this to a secure secret key
-app.config['MAIL_SERVER'] = 'smtp.example.com'  # Change this to your SMTP server
+app.config['JWT_SECRET_KEY'] = 'j2D7Ku4aF8Rne2vdmefam'  
+app.config['MAIL_SERVER'] = 'smtp.gmail.com' 
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_']
+app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = 'daveroymutisya2@gmail.com'
 app.config['MAIL_PASSWORD'] = os.getenv('Daveroy')
 
@@ -55,7 +55,7 @@ def initiate_registration():
     email = data.get('email')
 
     # Check if the email belongs to a superuser
-    if email == 'superuser@example.com':  # Change this to your superuser email
+    if email == 'daveroymutisya2@gmail.com':  # Change this to your superuser email
         # Generate token for registration link
         access_token = create_access_token(identity=email)
 
@@ -87,7 +87,7 @@ def register():
             user = User(email=email)
 
             # Check if user is an admin
-            if email == 'admin@example.com':  # Change this to your admin email
+            if email == 'ronnie@gmail.com':  # Change this to your admin email
                 user.is_admin = True
 
             db.session.add(user)
