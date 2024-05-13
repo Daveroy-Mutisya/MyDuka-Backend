@@ -8,16 +8,17 @@ def main():
     with app.app_context():
         # Seeding users
         users = [
-            User(username="clerk1", email="clerk1@example.com", password=bcrypt.generate_password_hash("Clerk1pass").decode('utf-8'), role='clerk'),
-            User(username="admin1", email="admin1@example.com", password=bcrypt.generate_password_hash("Admin1pass").decode('utf-8'), role='admin'),
-            User(username="merchant1", email="merchant1@example.com", password=bcrypt.generate_password_hash("Merchant1pass").decode('utf-8'), role='merchant')
+            User(username="Teddy", email="clerk1@example.com", password=bcrypt.generate_password_hash("Clerk1pass").decode('utf-8'), role='clerk'),
+            User(username="Leiyan", email="clerk1@example.com", password=bcrypt.generate_password_hash("Clerk1pass").decode('utf-8'), role='clerk'),
+            User(username="Ronnie", email="admin1@example.com", password=bcrypt.generate_password_hash("Admin1pass").decode('utf-8'), role='admin'),
+            User(username="Dave", email="merchant1@example.com", password=bcrypt.generate_password_hash("Merchant1pass").decode('utf-8'), role='merchant')
         ]
         db.session.add_all(users)
         db.session.commit()    
 
         # Seeding stores
         stores = [
-            Store(name="Store A", location="Location A", user_id=2),
+            Store(name="Naivas", location="Location A", user_id=2),
             Store(name="Store B", location="Location B", user_id=3),
             Store(name="Store C", location="Location C", user_id=3)
         ]
