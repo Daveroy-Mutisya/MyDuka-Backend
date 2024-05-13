@@ -21,7 +21,7 @@ app.config['JWT_SECRET_KEY'] = 'j2D7Ku4aF8Rne2vdmefam    '  # Change this to a s
 app.config['MAIL_SERVER'] = 'smtp.example.com'  # Change this to your SMTP server
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_']
+# app.config['MAIL_USE_'] = ''
 app.config['MAIL_USERNAME'] = 'daveroymutisya2@gmail.com'
 app.config['MAIL_PASSWORD'] = os.getenv('Daveroy')
 
@@ -42,11 +42,11 @@ jwt.init_app(app)
 def home ():
     return _render.template('index.html')
 
-# Define User model
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    is_admin = db.Column(db.Boolean, default=False)
+# # Define User model
+# class User(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     email = db.Column(db.String(100), unique=True, nullable=False)
+#     is_admin = db.Column(db.Boolean, default=False)
 
 # Define superuser route to initialize registration process
 @app.route('/initiate-registration', methods=['POST'])

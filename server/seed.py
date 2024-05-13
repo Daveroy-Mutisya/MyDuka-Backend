@@ -12,11 +12,11 @@ def main():
         # Seeding users
         users = [
 
-            User(username="Teddy Maina", email="mainateddy9@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image=""),
-            User(username="Brian Murigi", email="brianmurigi19@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image=""), 
-            User(username="Victor Leyian", email="leyianv360@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image=""),
-            User(username="Ronnie Langat", email="ronnielangat2020@gmail.com", password=bcrypt.generate_password_hash("Admin1@pass").decode('utf-8'), role='admin', image=""),
-            User(username="Dave Roy", email="daveroymutisya2@gmail.com", password=bcrypt.generate_password_hash("Merchant1@pass").decode('utf-8'), role='merchant', image="")
+            User(username="Teddy Maina", email="mainateddy9@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"),
+            User(username="Brian Murigi", email="brianmurigi19@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"), 
+            User(username="Victor Leyian", email="leyianv360@gmail.com", password=bcrypt.generate_password_hash("Clerk1@pass").decode('utf-8'), role='clerk', image="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"),
+            User(username="Ronnie Langat", email="ronnielangat2020@gmail.com", password=bcrypt.generate_password_hash("Admin1@pass").decode('utf-8'), role='admin', image="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"),
+            User(username="Dave Roy", email="daveroymutisya2@gmail.com", password=bcrypt.generate_password_hash("Merchant1@pass").decode('utf-8'), role='merchant', image="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png")
 
 
         ]
