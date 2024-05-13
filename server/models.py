@@ -96,3 +96,10 @@ class Request(db.Model, SerializerMixin):
     def validate_quantity(self, key, quantity):
         assert quantity > 0, "Quantity must be a positive integer"
         return quantity
+    
+
+
+# This defines the roles of the merchant, admins and clerk
+class Role(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)

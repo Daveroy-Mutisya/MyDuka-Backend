@@ -42,11 +42,23 @@ jwt.init_app(app)
 def home ():
     return _render.template('index.html')
 
-# # Define User model
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     email = db.Column(db.String(100), unique=True, nullable=False)
-#     is_admin = db.Column(db.Boolean, default=False)
+# This is to define the different roles
+class Role(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+
+
+# This table establishes the many to many relationship between users
+user_roles = db.Table('user_roles',
+                       
+                    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+                    db.Column('role_id', db.Integer, db.ForeignKey('role.id'), primary_key=True))
+
+# Define User model
+class User(db.Model):
+   id = db.Column(db.Integer, primary_key=True)
+   email = db.Column(db.String(100), unique=True, nullable=False)
+   roles = db.relationship('Role', secondary=user_roles, backref=db.backref('users', lazy='dynamic'))
 
 # Define superuser route to initialize registration process
 @app.route('/initiate-registration', methods=['POST'])
@@ -99,6 +111,42 @@ def register():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+
+
+# This route checks if the user is a merchant
+@app.route('/merchant-panel', methods=['GET'])
+@jwt_required()
+def merchant_panel():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user and 'merchant' in [role.name for role in user.roles]:
+        return jsonify({'message': 'Welcome to the merchant panel!'}), 200
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+
+# This route checks if the user is an admin
+@app.route('/admin-panel', methods=['GET'])
+@jwt_required()
+def admin_panel():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user and 'admin' in [role.name for role in user.roles]:
+        return jsonify({'message': 'Welcome to the admin panel!'}), 200
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
+    
+
+# This route checks if the user is an clerk
+@app.route('/clerk-panel', methods=['GET'])
+@jwt_required()
+def clerk_panel():
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if user and 'clerk' in [role.name for role in user.roles]:
+        return jsonify({'message': 'Welcome to the clerk panel!'}), 200
+    else:
+        return jsonify({'error': 'Unauthorized'}), 401
 
 
 
