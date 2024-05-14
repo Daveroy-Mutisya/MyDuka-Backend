@@ -94,7 +94,49 @@ jwt.init_app(app)
 #         return jsonify({'error': str(e)}), 500
 
 
+## This if for clerks requesting products to admins
+# The get_requests checks if the products exists
+@app.route('/products', methods=['GET'])
+def get_requests():
+    
+    # Assuming the clerk has been authenticated
+    if current_user.role == 'clerk':
+       products = Product.query.all() # this querys from the product tables
+       serialized_products = [product.serialize() for product in products]
+       return jsonify(serialized_products), 200
+    else:
+        return jsonify({"message": "Unauthorized"}), 401
 
+   
+## This then sends a post request to the request table adding the new request to the table
+@app.route('/requests', methods=['POST'])
+def add_request():
+    if current_user.role == 'clerk':  
+        data = request.json
+        product_id = data['product_id']
+        quantity = data['quantity']
+        requester_name = data['requester_name']
+        requester_contact = data['requester_contact']
+        
+        # This checks if the request already exists in the database
+        existing_request = Request.query.filter_by(product_id=product_id, 
+                                                   quantity=quantity, 
+                                                   requester_name=requester_name, 
+                                                   requester_contact=requester_contact).first()
+        if existing_request:
+            return jsonify({'message': 'The request has already been sent'}), 409 
+        else:
+            new_request = Request(
+                product_id=product_id,
+                quantity=quantity,
+                requester_name=requester_name,
+                requester_contact=requester_contact
+            )
+            db.session.add(new_request)
+            db.session.commit()
+            return jsonify({'message': 'Request added successfully'}), 201
+    else:
+        return jsonify({"message": "Unauthorized"}), 401
 
 
 
