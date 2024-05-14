@@ -170,6 +170,13 @@ def get_products():
         return jsonify(serialized_products), 200
     else:
         return jsonify({"message": "Unauthorized"}), 401
+    
+
+@app.route('/request', methods =['GET'])
+@jwt_required()
+def get_request():
+    if current_identity.role == 'clerk':
+    request = Request.query.all()
 
 
 
