@@ -37,67 +37,63 @@ db.init_app(app)
 jwt.init_app(app)
 
 
-@app.route('/home')
-@app.route('/')
-def home ():
-    return _render.template('index.html')
+# @app.route('/home')
+# @app.route('/')
+# def home ():
+#     return _render.template('index.html')
 
-# # Define User model
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     email = db.Column(db.String(100), unique=True, nullable=False)
-#     is_admin = db.Column(db.Boolean, default=False)
+# # Define superuser route to initialize registration process
+# @app.route('/initiate-registration', methods=['POST'])
+# def initiate_registration():
+#     data = request.json
+#     email = data.get('email')
 
-# Define superuser route to initialize registration process
-@app.route('/initiate-registration', methods=['POST'])
-def initiate_registration():
-    data = request.json
-    email = data.get('email')
+#     # Check if the email belongs to a superuser
+#     if email == 'superuser@example.com':  # Change this to your superuser email
+#         # Generate token for registration link
+#         access_token = create_access_token(identity=email)
 
-    # Check if the email belongs to a superuser
-    if email == 'superuser@example.com':  # Change this to your superuser email
-        # Generate token for registration link
-        access_token = create_access_token(identity=email)
+#         # Send email with tokenized link for registration
+#         msg = Message('Registration Link', sender='admin@example.com', recipients=[email])
+#         msg.body = f"Use the following link to register: http://example.com/register?token={access_token}"
+#         mail.send(msg)
 
-        # Send email with tokenized link for registration
-        msg = Message('Registration Link', sender='admin@example.com', recipients=[email])
-        msg.body = f"Use the following link to register: http://example.com/register?token={access_token}"
-        mail.send(msg)
+#         return jsonify({'message': 'Registration link sent successfully'}), 200
+#     else:
+#         return jsonify({'error': 'Unauthorized'}), 401
 
-        return jsonify({'message': 'Registration link sent successfully'}), 200
-    else:
-        return jsonify({'error': 'Unauthorized'}), 401
+# # Define registration route for invitee to register
+# @app.route('/register', methods=['POST'])
+# def register():
+#     token = request.args.get('token')
+#     data = request.json
+#     email = data.get('email')
 
-# Define registration route for invitee to register
-@app.route('/register', methods=['POST'])
-def register():
-    token = request.args.get('token')
-    data = request.json
-    email = data.get('email')
+#     # Verify token
+#     try:
+#         decoded_token = jwt.decode(token, app.config['JWT_SECRET_KEY'])
+#         if decoded_token['email'] == email:
+#             # Check if user already exists
+#             if User.query.filter_by(email=email).first():
+#                 return jsonify({'error': 'User already exists'}), 400
 
-    # Verify token
-    try:
-        decoded_token = jwt.decode(token, app.config['JWT_SECRET_KEY'])
-        if decoded_token['email'] == email:
-            # Check if user already exists
-            if User.query.filter_by(email=email).first():
-                return jsonify({'error': 'User already exists'}), 400
+#             # Create new user
+#             user = User(email=email)
 
-            # Create new user
-            user = User(email=email)
+#             # Check if user is an admin
+#             if email == 'admin@example.com':  # Change this to your admin email
+#                 user.is_admin = True
 
-            # Check if user is an admin
-            if email == 'admin@example.com':  # Change this to your admin email
-                user.is_admin = True
+#             db.session.add(user)
+#             db.session.commit()
 
-            db.session.add(user)
-            db.session.commit()
+#             return jsonify({'message': 'User registered successfully'}), 201
+#         else:
+#             return jsonify({'error': 'Invalid token'}), 401
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
 
-            return jsonify({'message': 'User registered successfully'}), 201
-        else:
-            return jsonify({'error': 'Invalid token'}), 401
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+
 
 
 
