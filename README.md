@@ -62,6 +62,9 @@ These steps will guide you through the process of setting up the backend for MyD
 
 ![MyDuka Backend Rep](https://github.com/dmbeastz/MyDuka-Backend/assets/145768413/2426c2b3-2d2b-409e-bdec-d5e38f23caa4)
 
+### Figma Design
+https://www.figma.com/design/zS8q2P5SujTgOrkDPTw29c/MyDuka?node-id=0-1&t=ViKHLsHWDtcy4KNh-0 
+
 
 ### Backend Endpoints
 #### Authentication:
