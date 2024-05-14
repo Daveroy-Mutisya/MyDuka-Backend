@@ -13,6 +13,16 @@ from flask_mail import Mail, Message
 import os 
 
 
+@app.route('/products', methods=['GET'])
+@jwt_required()  # Ensure authentication is required
+def get_products():
+    if current_identity.role == 'clerk':  # Assuming role is stored in current_identity
+        products = Product.query.all()
+        serialized_products = [product.serialize() for product in products]
+        return jsonify(serialized_products), 200
+    else:
+        return jsonify({"message": "Unauthorized"}), 401
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///myduka.db'
@@ -113,53 +123,53 @@ def register():
 
 
 
-# This route checks if the user is a merchant
-@app.route('/merchant-panel', methods=['GET'])
-@jwt_required()
-def merchant_panel():
-    current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
-    if user and 'merchant' in [role.name for role in user.roles]:
-        return jsonify({'message': 'Welcome to the merchant panel!'}), 200
-    else:
-        return jsonify({'error': 'Unauthorized'}), 401
+# # This route checks if the user is a merchant
+# @app.route('/merchant-panel', methods=['GET'])
+# @jwt_required()
+# def merchant_panel():
+#     current_user_email = get_jwt_identity()
+#     user = User.query.filter_by(email=current_user_email).first()
+#     if user and 'merchant' in [role.name for role in user.roles]:
+#         return jsonify({'message': 'Welcome to the merchant panel!'}), 200
+#     else:
+#         return jsonify({'error': 'Unauthorized'}), 401
     
 
-# This route checks if the user is an admin
-@app.route('/admin-panel', methods=['GET'])
-@jwt_required()
-def admin_panel():
-    current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
-    if user and 'admin' in [role.name for role in user.roles]:
-        return jsonify({'message': 'Welcome to the admin panel!'}), 200
-    else:
-        return jsonify({'error': 'Unauthorized'}), 401
+# # This route checks if the user is an admin
+# @app.route('/admin-panel', methods=['GET'])
+# @jwt_required()
+# def admin_panel():
+#     current_user_email = get_jwt_identity()
+#     user = User.query.filter_by(email=current_user_email).first()
+#     if user and 'admin' in [role.name for role in user.roles]:
+#         return jsonify({'message': 'Welcome to the admin panel!'}), 200
+#     else:
+#         return jsonify({'error': 'Unauthorized'}), 401
     
 
-# This route checks if the user is an clerk
-@app.route('/clerk-panel', methods=['GET'])
-@jwt_required()
-def clerk_panel():
-    current_user_email = get_jwt_identity()
-    user = User.query.filter_by(email=current_user_email).first()
-    if user and 'clerk' in [role.name for role in user.roles]:
-        return jsonify({'message': 'Welcome to the clerk panel!'}), 200
+# # This route checks if the user is an clerk
+# @app.route('/clerk-panel', methods=['GET'])
+# @jwt_required()
+# def clerk_panel():
+#     current_user_email = get_jwt_identity()
+#     user = User.query.filter_by(email=current_user_email).first()
+#     if user and 'clerk' in [role.name for role in user.roles]:
+#         return jsonify({'message': 'Welcome to the clerk panel!'}), 200
+#     else:
+#         return jsonify({'error': 'Unauthorized'}), 401
+    
+
+
+
+@app.route('/products', methods=['GET'])
+@jwt_required()  # Ensure authentication is required
+def get_products():
+    if current_identity.role == 'clerk':  # Assuming role is stored in current_identity
+        products = Product.query.all()
+        serialized_products = [product.serialize() for product in products]
+        return jsonify(serialized_products), 200
     else:
-        return jsonify({'error': 'Unauthorized'}), 401
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return jsonify({"message": "Unauthorized"}), 401
 
 
 

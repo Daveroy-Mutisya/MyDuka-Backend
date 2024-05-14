@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.orm import validates
 import re
-
+from flask import jsonify
 db = SQLAlchemy()
 
 class User(db.Model):
@@ -53,6 +53,19 @@ class Product(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f"Product(name='{self.name}', store_id='{self.store_id}')"
+    
+    #only clerks can register and access a product
+
+    #checks the role of the user
+    @staticmethod
+    def is_clerk():
+        current_user_email = get_jwt_identity()
+        user = User.query.filter_by(email=current_user_email).first()
+        return user and 'clerk' in [role.name for role in user.roles]
+    
+    
+
+
 
 class Store(db.Model):
     __tablename__ = 'stores'
