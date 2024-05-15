@@ -1,70 +1,55 @@
-from flask import Flask
-from flask.templating import _render
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from models import db
 from flask_marshmallow import Marshmallow
-from passlib.context import CryptContext
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, create_refresh_token,create_access_token
-from flask import Blueprint, jsonify, request
-from flask_bcrypt import Bcrypt
-from models import User, Product, Store, Payment, PaymentStatus, Request
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token,get_jwt_identity
 from flask_mail import Mail, Message
-import os 
-
-
+from flask_bcrypt import Bcrypt
+import os
+from models import db, User
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///myduka.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['JWT_SECRET_KEY'] = 'j2D7Ku4aF8Rne2vdmefam    '  # Change this to a secure secret key
-app.config['MAIL_SERVER'] = 'smtp.example.com'  # Change this to your SMTP server
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')  # Change this to a secure secret key
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Change this to your SMTP server
 app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = False
-# app.config['MAIL_USE_'] = ''
-app.config['MAIL_USERNAME'] = 'daveroymutisya2@gmail.com'
-app.config['MAIL_PASSWORD'] = os.getenv('Daveroy')
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 
-# Initializing Flask-Migrate and other extensions
-migrate = Migrate(app, db)
-ma = Marshmallow
-jwt = JWTManager()
+# Initialize Flask extensions
+db.init_app(app)
+ma = Marshmallow(app)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
 mail = Mail(app)
 
 
-# Initialize SQLAlchemy
-db.init_app(app)
-jwt.init_app(app)
-
-
-# @app.route('/home')
-# @app.route('/')
-# def home ():
-#     return _render.template('index.html')
-
-# # Define superuser route to initialize registration process
-# @app.route('/initiate-registration', methods=['POST'])
-# def initiate_registration():
+# # Route to initiate registration process for inviting admins
+# @app.route('/invite-admin', methods=['POST'])
+# def invite_admin():
 #     data = request.json
 #     email = data.get('email')
 
-#     # Check if the email belongs to a superuser
-#     if email == 'superuser@example.com':  # Change this to your superuser email
-#         # Generate token for registration link
+#     # Check if the email belongs to the merchant (superuser)
+#     if email == 'myduka7@gmail.com':  # Change this to your superuser email
+#         # Generate access token for registration link
 #         access_token = create_access_token(identity=email)
 
 #         # Send email with tokenized link for registration
-#         msg = Message('Registration Link', sender='admin@example.com', recipients=[email])
-#         msg.body = f"Use the following link to register: http://example.com/register?token={access_token}"
+#         msg = Message('Admin Registration Link', sender='admin@example.com', recipients=[email])
+#         msg.body = f"Use the following link to register as an admin: http://example.com/register-admin?token={access_token}"
 #         mail.send(msg)
 
 #         return jsonify({'message': 'Registration link sent successfully'}), 200
 #     else:
 #         return jsonify({'error': 'Unauthorized'}), 401
 
-# # Define registration route for invitee to register
-# @app.route('/register', methods=['POST'])
-# def register():
+
+# # Route for registering admins using the tokenized link
+# @app.route('/register-admin', methods=['POST'])
+# def register_admin():
 #     token = request.args.get('token')
 #     data = request.json
 #     email = data.get('email')
@@ -72,45 +57,43 @@ jwt.init_app(app)
 #     # Verify token
 #     try:
 #         decoded_token = jwt.decode(token, app.config['JWT_SECRET_KEY'])
-#         if decoded_token['email'] == email:
+#         if decoded_token['identity'] == email:
 #             # Check if user already exists
 #             if User.query.filter_by(email=email).first():
 #                 return jsonify({'error': 'User already exists'}), 400
 
 #             # Create new user
-#             user = User(email=email)
+#             new_admin = User(email=email, role='admin')
 
-#             # Check if user is an admin
-#             if email == 'admin@example.com':  # Change this to your admin email
-#                 user.is_admin = True
-
-#             db.session.add(user)
+#             db.session.add(new_admin)
 #             db.session.commit()
 
-#             return jsonify({'message': 'User registered successfully'}), 201
+#             return jsonify({'message': 'Admin registered successfully'}), 201
 #         else:
 #             return jsonify({'error': 'Invalid token'}), 401
 #     except Exception as e:
 #         return jsonify({'error': str(e)}), 500
 
 
+# # Route for deactivating or deleting admin accounts
+# @app.route('/admin/<int:id>', methods=['DELETE'])
+# @jwt_required()  # Requires authentication
+# def delete_admin(id):
+#     current_user = get_jwt_identity()
+#     if current_user['role'] != 'merchant':
+#         return jsonify({'error': 'Unauthorized'}), 401
 
+#     admin = User.query.get(id)
+#     if not admin:
+#         return jsonify({'error': 'Admin not found'}), 404
 
+#     # Deactivate or delete admin account
+#     # Example: admin.active = False or db.session.delete(admin)
+#     # You can implement your own logic here
 
+#     db.session.commit()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#     return jsonify({'message': 'Admin account deactivated or deleted successfully'}), 200
 
 
 if __name__ == '__main__':
