@@ -62,6 +62,18 @@ These steps will guide you through the process of setting up the backend for MyD
 
 ![MyDuka Backend Rep](https://github.com/dmbeastz/MyDuka-Backend/assets/145768413/2426c2b3-2d2b-409e-bdec-d5e38f23caa4)
 
+#### Relationship descriptions:
+
+Many-to-One between Products and Stores: Each product belongs to one store, establishing a many-to-one relationship between products and stores. This means that a product is associated with only one store, but a store can have multiple products.
+
+Many-to-One between Stores and Users: Each store belongs to one user, establishing a many-to-one relationship between stores and users. This means that a store is associated with only one user, but a user can own multiple stores.
+
+Many-to-One between Payments and Stores: Each payment is made to one store, establishing a many-to-one relationship between payments and stores. This means that a payment is associated with only one store, but a store can have multiple payments.
+
+Many-to-One between Requests and Stores: Each request is made by one store, establishing a many-to-one relationship between requests and stores. This means that a request is associated with only one store, but a store can make multiple requests.
+
+Many-to-One between Requests and Products: Each request is for one product, establishing a many-to-one relationship between requests and products. This means that a request is associated with only one product, but a product can be requested by multiple stores.
+
 ### Figma Design
 https://www.figma.com/design/zS8q2P5SujTgOrkDPTw29c/MyDuka?node-id=0-1&t=ViKHLsHWDtcy4KNh-0 
 
