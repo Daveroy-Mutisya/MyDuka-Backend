@@ -62,6 +62,8 @@ These steps will guide you through the process of setting up the backend for MyD
 
 ![MyDuka Backend Rep](https://github.com/dmbeastz/MyDuka-Backend/assets/145768413/2426c2b3-2d2b-409e-bdec-d5e38f23caa4)
 
+Link : https://dbdiagram.io/d/MyDuka-Backend-Rep-664359fa9e85a46d55d10457
+
 #### Relationship descriptions:
 
 Many-to-One between Products and Stores: Each product belongs to one store, establishing a many-to-one relationship between products and stores. This means that a product is associated with only one store, but a store can have multiple products.
@@ -78,13 +80,18 @@ Many-to-One between Requests and Products: Each request is for one product, esta
 https://www.figma.com/design/zS8q2P5SujTgOrkDPTw29c/MyDuka?node-id=0-1&t=ViKHLsHWDtcy4KNh-0 
 
 
-### Backend Endpoints
-#### Authentication:
+Here's the categorized list of routes in the specified README format:
+
+## Backend Endpoints
+
+### Authentication
+**User Model:**
 - POST /register-admin: Initialize the registration process for an admin (superuser only).
 - POST /register-clerk: Register a new clerk (admin only).
 - POST /signin: Sign in with email and password. Returns access and refresh tokens.
 
-#### Employees:
+### Employees
+**User Model:**
 - GET /admins: Retrieve all admin users (superuser only).
 - POST /admins: Create a new admin user (superuser only).
 - GET /clerks: Retrieve all clerk users (admin only).
@@ -93,23 +100,24 @@ https://www.figma.com/design/zS8q2P5SujTgOrkDPTw29c/MyDuka?node-id=0-1&t=ViKHLsH
 - PATCH /user/{id}: Update a user by ID (admin or self only).
 - DELETE /user/{id}: Delete a user by ID (admin only).
 
-#### Dashboard (Clerk):
+### Dashboard (Clerk)
+**Product and Request model:**
 - GET /dashboard: Retrieve dashboard details (clerk only).
 - POST /requests: Make a product supply request (clerk only).
 
-#### Store Admin:
+### Store Admin
+**Store Model:**
 - GET /dashboard: Retrieve dashboard details (store admin only).
 - GET /reports: Retrieve detailed reports on individual entries (store admin only).
 - PATCH /requests/{request_id}: Approve or decline supply requests from clerks (store admin only).
 - PATCH /payments/{payment_id}: Change payment status to paid for unpaid products (store admin only).
 - PATCH /clerks/{clerk_id}: Deactivate or delete a clerk's account and add new clerks (store admin only).
 
-#### Merchant:
+### Merchant
+**User Model:**
 - GET /admins: Retrieve all admin users (merchant only).
 - POST /admins: Create a new admin user (merchant only).
+**Store Model:**
 - GET /store-reports: Retrieve store-by-store reports in well-visualized graphs (merchant only).
 - GET /store/{store_id}/performance: Retrieve individual store performance, including individual product performance (merchant only).
 - GET /store/{store_id}/payments: Retrieve paid and unpaid products for each store (merchant only).
-
-
-
