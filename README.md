@@ -102,12 +102,12 @@ Here's the categorized list of routes in the specified README format:
 
 ### Dashboard (Clerk)
 **Product and Request model:**
-- GET /dashboard: Retrieve dashboard details (clerk only).
-- POST /requests: Make a product supply request (clerk only).
+- GET /clerkpanel: Retrieve product and request details (clerk only).
+- POST /requests: Make a product and supply request (clerk only).
 
 ### Store Admin
 **Store Model:**
-- GET /dashboard: Retrieve dashboard details (store admin only).
+- GET /adminpanel: Retrieve Store, Product and Request details (store admin only).
 - GET /reports: Retrieve detailed reports on individual entries (store admin only).
 - PATCH /requests/{request_id}: Approve or decline supply requests from clerks (store admin only).
 - PATCH /payments/{payment_id}: Change payment status to paid for unpaid products (store admin only).
