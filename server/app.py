@@ -74,6 +74,7 @@ def register():
     token = request.args.get('token')
     data = request.json
     email = data.get('email')
+    
 
     # Verify token
     try:
