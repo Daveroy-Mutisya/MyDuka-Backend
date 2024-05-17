@@ -97,3 +97,24 @@ class Request(db.Model, SerializerMixin):
     def validate_quantity(self, key, quantity):
         assert quantity > 0, "Quantity must be a positive integer"
         return quantity
+    
+
+#Adding a class for dashboard for the store admin
+class Dashboard:
+    def __init__(self, total_sales, top_products, low_stock_items):
+        self.view_performance = {
+            "total_sales": total_sales,
+            "top_products": top_products,
+            "low_stock_items": low_stock_items,
+        }
+
+# Added a class for reports for the store admin
+class Report(db.Model):
+    __tablename__ = 'reports'
+    id = db.Column(db.Integer, primary_key=True)
+    entry_id = db.Column(db.Integer, nullable=False)
+    details = db.Column(db.Text, nullable=False) #replace this with actual data
+
+    def __repr__(self):
+        return f"<Report id='{self.id}', entry_id='{self.entry_id}'>"
+        
