@@ -24,7 +24,7 @@ db.init_app(app)
 ma = Marshmallow(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
-mail = Mail(app)z
+mail = Mail(app)
 
 
 # Helper function to get the current user
