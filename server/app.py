@@ -429,9 +429,10 @@ def get_stores():
     
     return jsonify({'stores': stores_list}), 200
 
-####################################ROUTE FOR CREATING A STORE(MERCHANT ONLY)######################################---------TO BE TESTED--------------###########
+####################################ROUTE FOR CREATING A STORE(MERCHANT ONLY)######################################---------WORKS--------------###########
+# Add store (POST)
 @app.route('/stores', methods=['POST'])
-@jwt_required()  # Requires authentication
+@jwt_required()
 def create_store():
     current_user = get_jwt_identity()
     if current_user['role'] != 'merchant':
@@ -439,53 +440,50 @@ def create_store():
     
     data = request.json
     name = data.get('name')
+    image = data.get('image')
     location = data.get('location')
-    if not name or not location:
+    if not name or not image or not location:
         return jsonify({'error': 'Missing required fields'}), 400
     
-    new_store = Store(name=name, location=location, user_id=current_user['id'])
+    new_store = Store(name=name, image=image, location=location, user_id=current_user['id'])
     db.session.add(new_store)
     db.session.commit()
 
     return jsonify({'message': 'Store created successfully'}), 201
 
-###############################################ROUTE FOR EDITING A STORE(MERCHANT ONLY)###################---------TO BE TESTED--------------###########################################
+###############################################ROUTE FOR EDITING A STORE(MERCHANT ONLY)###################---------WORKS--------------###########################################
+# Edit store (PATCH)
 @app.route('/stores/<int:store_id>', methods=['PATCH'])
-@jwt_required()  # Requires authentication
+@jwt_required()
 def edit_store(store_id):
     current_user = get_jwt_identity()
-    store = Store.query.filter_by(id=store_id).first()
+    store = Store.query.filter_by(id=store_id, user_id=current_user['id']).first()
     if not store:
         return jsonify({'error': 'Store not found'}), 404
-    
-    if current_user['role'] != 'merchant' or store.user_id != current_user['id']:
-        return jsonify({'error': 'Unauthorized'}), 401
     
     data = request.json
     name = data.get('name')
     image = data.get('image')
     location = data.get('location')
-    if not image or name or not location:
+    if not name or not image or not location:
         return jsonify({'error': 'Missing required fields'}), 400
     
     store.name = name
-    store.location = location
     store.image = image
+    store.location = location
     db.session.commit()
 
     return jsonify({'message': 'Store updated successfully'}), 200
 
 ########################################ROUTE FOR DELETING A STORE (MERCHANT ONLY)############################################---------TO BE TESTED--------------###############################
+# Delete store (DELETE)
 @app.route('/stores/<int:store_id>', methods=['DELETE'])
-@jwt_required()  # Requires authentication
+@jwt_required()
 def delete_store(store_id):
     current_user = get_jwt_identity()
-    store = Store.query.filter_by(id=store_id).first()
+    store = Store.query.filter_by(id=store_id, user_id=current_user['id']).first()
     if not store:
         return jsonify({'error': 'Store not found'}), 404
-    
-    if current_user['role'] != 'merchant' or store.user_id != current_user['id']:
-        return jsonify({'error': 'Unauthorized'}), 401
     
     db.session.delete(store)
     db.session.commit()
