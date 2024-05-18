@@ -53,7 +53,7 @@ def generate_secure_password(length=12):
     password = ''.join(secrets.choice(alphabet) for i in range(length))
     return password
 
-#######################################DAVE ROUTE FOR LOGIN (WORKS) FOR EVERYBODY ALL USERS########################################################################################################
+#######################################ROUTE FOR LOGIN (WORKS) FOR EVERYBODY ALL USERS########################################################################################################
 def create_token_for_user(user):
     identity = {
         'id': user.id,
@@ -107,7 +107,7 @@ class TokenRefresh(Resource):
 
 api.add_resource(TokenRefresh, '/refresh-token')
 
-###############################################PROFILE ROUTE ---------TO BE TESTED-------------- (FOR ALL USERS)#########################################################################################
+###############################################PROFILE ROUTE ---------WORKS-------------- (FOR ALL USERS)#########################################################################################
 class Profile:
     @staticmethod
     @profile_bp.route('/profile', methods=['GET'])
@@ -176,7 +176,7 @@ class Profile:
 # Register the blueprint with your Flask app
 app.register_blueprint(profile_bp)
 
-#######################################DAVE ROUTE FOR SENDING ADMINS INVITES THROUGH EMAILS(MERCHANT ONLY) ---------TO BE TESTED--------------##############################################################################################
+#######################################DAVE ROUTE FOR SENDING ADMINS INVITES THROUGH EMAILS(MERCHANT ONLY) ---------WORKS--------------##############################################################################################
 
 @app.route('/invite-admin', methods=['POST'])
 def invite_admin():
@@ -262,7 +262,7 @@ def get_admins():
 
 #############################################################################################################################################################
 
-####################################### DAVE ROUTE FOR DEACTIVATION AND REACTIVATION OF ADMINS (DOESN'T WORK)##############################################################################################
+####################################### DAVE ROUTE FOR DEACTIVATION AND REACTIVATION OF ADMINS MERCHANT ONLY(DOESN'T WORK)##############################################################################################
 
 
 # @app.before_request
@@ -336,7 +336,7 @@ def get_admins():
 
 ##########################################################################################################################################################################
 
-####################################### ROUTE FOR DELETING ADMINS(MERCHANT ONLY) WORKS##############################################################################################
+####################################### ROUTE FOR DELETING ADMINS(MERCHANT ONLY) ----WORKS-----------------##############################################################################################
 
 # Route for deleting admin accounts
 @app.route('/admin/<int:id>', methods=['DELETE'])
@@ -365,7 +365,7 @@ def delete_admin(id):
         return jsonify({'error': str(e)}), 500
 
 
-#######################################ROUTE FOR CREATING CLERKS WORKS(ADMIN ONLY)##############################################################################################
+#######################################ROUTE FOR CREATING CLERKS ---------WORKS-------(ADMIN ONLY)##############################################################################################
 
 @app.route('/store/<int:store_id>/register-clerk', methods=['POST'])
 @jwt_required()  # Requires authentication
@@ -400,7 +400,7 @@ def register_clerk():
 
 # Assuming you have a relationship defined between Store and Merchant
 
-####################################### ROUTES FOR STORES (MERCHANT ONLY) --WORKS##############################################################################################
+####################################### ROUTES FOR STORES (MERCHANT ONLY) --------WORKS-------##############################################################################################
 
 @app.route('/stores', methods=['GET'])
 @jwt_required()  # Requires authentication
@@ -449,7 +449,7 @@ def create_store():
 
     return jsonify({'message': 'Store created successfully'}), 201
 
-###############################################ROUTE FOR EDITING A STORE###################---------TO BE TESTED--------------###########################################
+###############################################ROUTE FOR EDITING A STORE(MERCHANT ONLY)###################---------TO BE TESTED--------------###########################################
 @app.route('/stores/<int:store_id>', methods=['PATCH'])
 @jwt_required()  # Requires authentication
 def edit_store(store_id):
@@ -475,7 +475,7 @@ def edit_store(store_id):
 
     return jsonify({'message': 'Store updated successfully'}), 200
 
-########################################ROUTE FOR DELETING############################################---------TO BE TESTED--------------###############################
+########################################ROUTE FOR DELETING A STORE (MERCHANT ONLY)############################################---------TO BE TESTED--------------###############################
 @app.route('/stores/<int:store_id>', methods=['DELETE'])
 @jwt_required()  # Requires authentication
 def delete_store(store_id):
@@ -493,7 +493,7 @@ def delete_store(store_id):
     return jsonify({'message': 'Store deleted successfully'}), 200
 
 
-####################################### ROUTE FOR GETTING STORE-PERFORMANCE -WORKS##############################################################################################
+####################################### ROUTE FOR GETTING STORE-PERFORMANCE (MERCHANT ONLY)------WORKS--------##############################################################################################
 # Route for retrieving individual store performance (merchant only)
 @app.route('/store/<int:store_id>/performance', methods=['GET'])
 @jwt_required()  # Requires authentication
@@ -518,7 +518,7 @@ def get_store_performance(store_id):
 
     return jsonify(store_performance), 200
 
-####################################### ROUTE FOR GETTING HOW PRODUCTS ARE PERFORMING PER STORE- WORKS##############################################################################################
+####################################### ROUTE FOR GETTING HOW PRODUCTS ARE PERFORMING PER STORE----------- WORKS---------(MERCHANT ONLY)##############################################################################################
 
 # Route for retrieving individual product performance within a store (merchant only)
 @app.route('/store/<int:store_id>/product-performance', methods=['GET'])
@@ -544,7 +544,7 @@ def get_product_performance(store_id):
 
     return jsonify(product_performance), 200
 
-#######################################ROUTE FOR GETTING PAYMENT AND PAYMENT DETAILS PER STORE - WORKS ##############################################################################################
+#######################################ROUTE FOR GETTING PAYMENT AND PAYMENT DETAILS PER STORE (MERCHANT AND ADMIN ONLY)-----------WORKS----------##############################################################################################
 @app.route('/store/<int:store_id>/payments', methods=['GET'])
 @jwt_required()  # Requires authentication
 def get_store_payments(store_id):
@@ -591,7 +591,7 @@ def get_store_payments(store_id):
     }
 
     return jsonify(response_data), 200
-############################################## ROUTE TO CREATE A PAYMENT#####################---------TO BE TESTED--------------######################################
+############################################## ROUTE TO CREATE A PAYMENT#####################(ADMIN ONLY)---------TO BE TESTED--------------######################################
 @app.route('/store/<int:store_id>/payments', methods=['POST'])
 @jwt_required()  # Requires authentication
 def create_payment(store_id):
@@ -632,7 +632,7 @@ def create_payment(store_id):
 
     return jsonify({'message': 'Payment created successfully'}), 201
 
-#########################################################ROUTE FOR  EDITING A PAYMENT ############---------TO BE TESTED--------------###################################################
+#########################################################ROUTE FOR  EDITING A PAYMENT ############(ADMIN ONLY)---------TO BE TESTED--------------###################################################
 @app.route('/store/<int:store_id>/payments/<int:payment_id>', methods=['PATCH'])
 @jwt_required()  # Requires authentication
 def edit_payment(store_id, payment_id):
@@ -665,7 +665,7 @@ def edit_payment(store_id, payment_id):
 
     return jsonify({'message': 'Payment updated successfully'}), 200
 
-###############################ROUTE FOR DELETING A PAYMENT #######---------TO BE TESTED--------------########################################################################
+###############################ROUTE FOR DELETING A PAYMENT #######(ADMIN ONLY)---------TO BE TESTED--------------########################################################################
 @app.route('/store/<int:store_id>/payments/<int:payment_id>', methods=['DELETE'])
 @jwt_required()  # Requires authentication
 def delete_payment(store_id, payment_id):
@@ -689,7 +689,7 @@ def delete_payment(store_id, payment_id):
     db.session.commit()
 
     return jsonify({'message': 'Payment deleted successfully'}), 200
-#######################################ROUTE FOR ALL GETTING PRODUCTS ----------WORKS-------------##############################################################################################
+#######################################ROUTE FOR ALL GETTING PRODUCTS (ALL USERS)----------WORKS-------------##############################################################################################
 
 @app.route('/store/<int:id>/products', methods=['GET'])
 @jwt_required()  # Requires authentication
@@ -710,7 +710,7 @@ def get_products(id):
         return jsonify({"message": "Unauthorized"}), 401
 
 
-####################################ROUTE FOR REGISTERING PRODUCTS AS A CLERK DOES ---WORKS----##########################################################################
+####################################ROUTE FOR REGISTERING PRODUCTS AS A CLERK DOES ---WORKS----(CLERK ONLY)##########################################################################
 
 @app.route('/stores/<int:id>/register-product', methods=['POST'])
 @jwt_required()
@@ -782,7 +782,7 @@ def add_product(id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-################################################ROUTES FOR EDITING/UPDATING PRODUCTS---------TO BE TESTED---------------###############################################################################################
+################################################ROUTES FOR EDITING/UPDATING PRODUCTS---------TO BE TESTED---------------(CLERK ONLY)###############################################################################################
 @app.route('/stores/<int:id>/products/<int:product_id>', methods=['PATCH'])
 @jwt_required()
 def update_product(id, product_id):
@@ -838,7 +838,7 @@ def update_product(id, product_id):
 
     return jsonify({'message': 'Product updated successfully', 'product': updated_product_info}), 200
 
-################################################################ROUTES FOR ADD/REGISTERING REQUESTS----------WORKS-----------######################################################################################
+################################################################ROUTES FOR ADD/REGISTERING REQUESTS(CLERK ONLY)----------WORKS-----------######################################################################################
 
 @app.route('/stores/<int:id>/register-request', methods=['POST'])
 @jwt_required()  # Requires authentication
@@ -892,7 +892,7 @@ def add_request(id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-###########################################ROUTE FOR EDITING/UPDATING REQUEST---------TO BE TESTED---------------############################################################################################
+###########################################ROUTE FOR EDITING/UPDATING REQUEST(CLERK AND ADMIN ONLY)---------TO BE TESTED---------------############################################################################################
     
 @app.route('/stores/<int:store_id>/requests/<int:request_id>', methods=['PATCH'])
 @jwt_required()  # Requires authentication
@@ -900,7 +900,7 @@ def update_request(store_id, request_id):
     current_user = get_jwt_identity()
     
     # Check if the user is authenticated as a clerk
-    if current_user['role'] != 'clerk':
+    if current_user['role'] != ['clerk', 'admin']:
         return jsonify({"message": "Unauthorized"}), 401
     
     # Extract request data from the JSON payload
@@ -941,7 +941,7 @@ def update_request(store_id, request_id):
 
 
     
-###############################################################ROUTE FOR DELETING PRODUCTS ---------TO BE TESTED--------------#######################################################################
+###############################################################ROUTE FOR DELETING PRODUCTS(CLERK ONLY) ---------TO BE TESTED--------------#######################################################################
 @app.route('/stores/<int:id>/product/<int:product_id>', methods=['DELETE'])
 @jwt_required()
 def delete_product(id, product_id):
@@ -959,7 +959,7 @@ def delete_product(id, product_id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-################################################ROUTES FOR DELETING REQUESTS---------TO BE TESTED--------------###################################################################################################
+################################################ROUTES FOR DELETING REQUESTS(CLERK ONLY)---------TO BE TESTED--------------###################################################################################################
 @app.route('/stores/<int:id>/request/<int:request_id>', methods=['DELETE'])
 @jwt_required()
 def delete_request(id, request_id):
