@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager,jwt_required, create_access_token,get_jwt_identity,create_refresh_token,verify_jwt_in_request
@@ -15,6 +15,7 @@ from datetime import timedelta
 import secrets
 import string
 from datetime import datetime
+from werkzeug.security import generate_password_hash
 
 
 
@@ -106,6 +107,78 @@ class TokenRefresh(Resource):
 
 api.add_resource(TokenRefresh, '/refresh-token')
 
+###############################################PROFILE ROUTE TO BE TESTED##################################################################################
+
+
+profile_bp = Blueprint('profile', __name__)
+
+class Profile:
+    @staticmethod
+    @profile_bp.route('/profile', methods=['GET'])
+    @jwt_required()
+    def get_profile():
+        current_user = get_jwt_identity()
+        user = User.query.filter_by(id=current_user['id']).first()
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        user_data = {
+            'id': user.id,
+            'name': user.name,
+            'username': user.username,
+            'email': user.email,
+            'image': user.image,
+            'role': user.role,
+            'entries': user.entries,
+            'active': user.active
+        }
+        return jsonify(user_data), 200
+
+    @staticmethod
+    @profile_bp.route('/profile', methods=['PATCH'])
+    @jwt_required()
+    def update_profile():
+        current_user = get_jwt_identity()
+        user = User.query.filter_by(id=current_user['id']).first()
+
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+
+        data = request.json
+
+        if 'name' in data:
+            user.name = data['name']
+        if 'username' in data:
+            if User.query.filter_by(username=data['username']).first() and user.username != data['username']:
+                return jsonify({'error': 'Username already taken'}), 409
+            user.username = data['username']
+        if 'email' in data:
+            if User.query.filter_by(email=data['email']).first() and user.email != data['email']:
+                return jsonify({'error': 'Email already taken'}), 409
+            user.email = data['email']
+        if 'password' in data:
+            user.password = generate_password_hash(data['password'])
+        if 'image' in data:
+            user.image = data['image']
+
+        db.session.commit()
+
+        updated_user_data = {
+            'id': user.id,
+            'name': user.name,
+            'username': user.username,
+            'email': user.email,
+            'image': user.image,
+            'role': user.role,
+            'entries': user.entries,
+            'active': user.active
+        }
+
+        return jsonify({'message': 'Profile updated successfully', 'user': updated_user_data}), 200
+
+# Register the blueprint with your Flask app
+app.register_blueprint(profile_bp)
 
 #######################################DAVE ROUTE FOR SENDING ADMINS INVITES THROUGH EMAILS WORKS##############################################################################################
 
@@ -821,6 +894,52 @@ def add_request(id):
             return jsonify({'message': 'Request added successfully'}), 201
     else:
         return jsonify({"message": "Unauthorized"}), 401
+    
+@app.route('/stores/<int:store_id>/requests/<int:request_id>', methods=['PATCH'])
+@jwt_required()  # Requires authentication
+def update_request(store_id, request_id):
+    current_user = get_jwt_identity()
+    
+    # Check if the user is authenticated as a clerk
+    if current_user['role'] != 'clerk':
+        return jsonify({"message": "Unauthorized"}), 401
+    
+    # Extract request data from the JSON payload
+    data = request.json
+    
+    # Retrieve the request to be updated
+    request = Request.query.filter_by(id=request_id, store_id=store_id).first()
+    
+    if not request:
+        return jsonify({'error': 'Request not found'}), 404
+
+    # Update the fields if present in the request data
+    if 'product_id' in data:
+        request.product_id = data['product_id']
+    if 'quantity' in data:
+        request.quantity = data['quantity']
+    if 'requester_name' in data:
+        request.requester_name = data['requester_name']
+    if 'requester_contact' in data:
+        request.requester_contact = data['requester_contact']
+    if 'status' in data:
+        request.status = data['status']
+    
+    # Commit the changes to the database
+    db.session.commit()
+    
+    updated_request_info = {
+        'id': request.id,
+        'store_id': request.store_id,
+        'product_id': request.product_id,
+        'quantity': request.quantity,
+        'requester_name': request.requester_name,
+        'requester_contact': request.requester_contact,
+        'status': request.status
+    }
+
+    return jsonify({'message': 'Request updated successfully', 'request': updated_request_info}), 200
+
 
     
 ###############################################################ROUTE FOR DELETING PRODUCTS AND REQUESTS #######################################################################
