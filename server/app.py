@@ -77,18 +77,11 @@ class Login(Resource):
         if not user:
             return {"error": "User does not exist"}, 401
 
-        try:
-            if not bcrypt.check_password_hash(user.password, password):
-                return {"error": "Incorrect password"}, 401
-        except ValueError:  # Handle "Invalid salt" error
-            # Reset password to a new secure one
-            new_password = generate_secure_password()  # Replace this with your password generation logic
-            user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
-            db.session.commit()
-            return {"error": "Password reset. Please check your email for the new password."}, 500
+        if not bcrypt.check_password_hash(user.password, password):
+            return {"error": "Incorrect password"}, 401
 
-        access_token = create_access_token(identity={'id': user.id, 'role': user.role})
-        refresh_token = create_refresh_token(identity={'id': user.id, 'role': user.role})
+        access_token = create_access_token(identity={'email': user.email, 'role': user.role})
+        refresh_token = create_refresh_token(identity={'email': user.email, 'role': user.role})
         return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
 api.add_resource(Login, '/login')
@@ -262,105 +255,70 @@ def get_admins():
 
 #############################################################################################################################################################
 
-####################################### DAVE ROUTE FOR DEACTIVATION AND REACTIVATION OF ADMINS MERCHANT ONLY(DOESN'T WORK)##############################################################################################
+####################################### DAVE ROUTE FOR DEACTIVATION AND REACTIVATION OF ADMINS MERCHANT ONLY(WORKS)##############################################################################################
 
 
-# @app.before_request
-# def check_if_user_is_active():
-#     if request.endpoint not in ('login', 'register', 'static'):  # Add non-protected endpoints as needed
-#         try:
-#             verify_jwt_in_request()
-#             current_user_identity = get_jwt_identity()
-#             user = User.query.filter_by(email=current_user_identity).first()
-#             if user and not user.active:
-#                 return jsonify({'error': 'User account is deactivated'}), 401
-#         except:
-#             pass 
+@app.before_request
+def check_if_user_is_active():
+    if request.endpoint not in ('login', 'register', 'static'):
+        try:
+            verify_jwt_in_request()
+            current_user_identity = get_jwt_identity()
+            if isinstance(current_user_identity, dict) and 'email' in current_user_identity:
+                user = User.query.filter_by(email=current_user_identity['email']).first()
+                if user and not user.active:
+                    return jsonify({'error': 'User account is deactivated'}), 401
+        except Exception as e:
+            pass  # Handle token verification exceptions if necessary
+         
 
-# @app.route('/admin/<int:id>/deactivate', methods=['PATCH'])
-# @jwt_required()  # Requires authentication
-# def deactivate_admin(id):
-#     current_user_identity = get_jwt_identity()
+
+@app.route('/admin/<int:id>/deactivate', methods=['PATCH'])
+@jwt_required()  # Requires authentication
+def deactivate_admin(id):
+    current_user_identity = get_jwt_identity()
     
-#     # Print out the current user identity for debugging
-#     print("Current User Identity:", current_user_identity)
+    # Check if the required keys exist in the identity
+    if not isinstance(current_user_identity, dict) or 'role' not in current_user_identity:
+        return jsonify({'error': 'Invalid token structure'}), 400
 
-#     # Check if the required keys exist in the identity
-#     if 'email' not in current_user_identity or 'role' not in current_user_identity:
-#         return jsonify({'error': 'Invalid token structure'}), 400
+    current_user_role = current_user_identity['role']  # Extract the role from the identity
 
-#     current_user_role = current_user_identity['role']  # Extract the role from the identity
-
-#     if current_user_role != 'merchant':
-#         return jsonify({'error': 'Unauthorized'}), 401
-
-#     admin = models.User.query.get(id)
-#     if not admin:
-#         return jsonify({'error': 'Admin not found'}), 404
-
-#     try:
-#         # Implement deactivation logic
-#         admin.active = False
-#         models.db.session.commit()
-#         return jsonify({'message': 'Admin account deactivated successfully'}), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-
-
-# @app.route('/admin/<int:id>/reactivate', methods=['PATCH'])
-# @jwt_required()  # Requires authentication
-# def reactivate_admin(id):
-#     current_user_identity = get_jwt_identity()
-
-#     # Check if the required keys exist in the identity
-#     if 'email' not in current_user_identity or 'role' not in current_user_identity:
-#         return jsonify({'error': 'Invalid token structure'}), 400
-
-#     current_user_role = current_user_identity['role']  # Extract the role from the identity
-
-#     if current_user_role != 'merchant':
-#         return jsonify({'error': 'Unauthorized'}), 401
-
-#     admin = models.User.query.get(id)
-#     if not admin:
-#         return jsonify({'error': 'Admin not found'}), 404
-
-#     try:
-#         # Implement reactivation logic
-#         admin.active = True
-#         models.db.session.commit()
-#         return jsonify({'message': 'Admin account reactivated successfully'}), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-##########################################################################################################################################################################
-
-####################################### ROUTE FOR DELETING ADMINS(MERCHANT ONLY) ----WORKS-----------------##############################################################################################
-
-# Route for deleting admin accounts
-@app.route('/admin/<int:id>', methods=['DELETE'])
-@jwt_required()  
-def delete_admin(id):
-    current_user = get_jwt_identity()
-    if current_user['role'] != 'merchant':
+    if current_user_role != 'merchant':
         return jsonify({'error': 'Unauthorized'}), 401
 
     admin = User.query.get(id)
     if not admin:
         return jsonify({'error': 'Admin not found'}), 404
 
-    # Check if the admin is the superuser, if yes, prevent deletion
-    if admin.email == 'myduka7@gmail.com':
-        return jsonify({'error': 'Cannot delete superuser account'}), 403
+    try:
+        admin.active = False
+        db.session.commit()
+        return jsonify({'message': 'Admin account deactivated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/<int:id>/reactivate', methods=['PATCH'])
+@jwt_required()  # Requires authentication
+def reactivate_admin(id):
+    current_user_identity = get_jwt_identity()
+
+    if not isinstance(current_user_identity, dict) or 'role' not in current_user_identity:
+        return jsonify({'error': 'Invalid token structure'}), 400
+
+    current_user_role = current_user_identity['role']  # Extract the role from the identity
+
+    if current_user_role != 'merchant':
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    admin = User.query.get(id)
+    if not admin:
+        return jsonify({'error': 'Admin not found'}), 404
 
     try:
-        # Implement deletion logic
-        db.session.delete(admin)
-
+        admin.active = True
         db.session.commit()
-
-        return jsonify({'message': 'Admin account deleted successfully'}), 200
+        return jsonify({'message': 'Admin account reactivated successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -475,7 +433,7 @@ def edit_store(store_id):
 
     return jsonify({'message': 'Store updated successfully'}), 200
 
-########################################ROUTE FOR DELETING A STORE (MERCHANT ONLY)############################################---------TO BE TESTED--------------###############################
+########################################ROUTE FOR DELETING A STORE (MERCHANT ONLY)############################################---------(WORKS)--------------###############################
 # Delete store (DELETE)
 @app.route('/stores/<int:store_id>', methods=['DELETE'])
 @jwt_required()
@@ -592,7 +550,7 @@ def get_store_payments(store_id):
     }
 
     return jsonify(response_data), 200
-############################################## ROUTE TO CREATE A PAYMENT#####################(ADMIN ONLY)---------TO BE TESTED--------------######################################
+############################################## ROUTE TO CREATE A PAYMENT#####################(ADMIN ONLY)---------(WORKS)--------------######################################||||||\|||||||||||||3\\\\\\\
 @app.route('/store/<int:store_id>/payments', methods=['POST'])
 @jwt_required()  # Requires authentication
 def create_payment(store_id):
@@ -622,7 +580,6 @@ def create_payment(store_id):
     new_payment = Payment(
         store_id=store_id,
         product_name=product_name,
-        status=PaymentStatus(status),
         amount=amount,
         method=method,
         due_date=datetime.strptime(due_date, '%Y-%m-%d').date()
@@ -633,21 +590,18 @@ def create_payment(store_id):
 
     return jsonify({'message': 'Payment created successfully'}), 201
 
-#########################################################ROUTE FOR  EDITING A PAYMENT ############(ADMIN ONLY)---------TO BE TESTED--------------###################################################
+#########################################################ROUTE FOR  EDITING A PAYMENT ############(ADMIN ONLY)---------(WORKS)--------------###################################################
 @app.route('/store/<int:store_id>/payments/<int:payment_id>', methods=['PATCH'])
 @jwt_required()  # Requires authentication
 def edit_payment(store_id, payment_id):
     current_user = get_jwt_identity()
 
-    if current_user['role'] not in ['admin']:
+    if current_user['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 401
 
     store = Store.query.get(store_id)
     if not store:
         return jsonify({'error': 'Store not found'}), 404
-
-    if current_user['role'] == 'admin' and store.user_id != current_user['id']:
-        return jsonify({'error': 'Unauthorized'}), 401
 
     payment = Payment.query.get(payment_id)
     if not payment or payment.store_id != store_id:
@@ -666,7 +620,8 @@ def edit_payment(store_id, payment_id):
 
     return jsonify({'message': 'Payment updated successfully'}), 200
 
-###############################ROUTE FOR DELETING A PAYMENT #######(ADMIN ONLY)---------TO BE TESTED--------------########################################################################
+
+###############################ROUTE FOR DELETING A PAYMENT #######(ADMIN ONLY)---------(Works)--------------########################################################################
 @app.route('/store/<int:store_id>/payments/<int:payment_id>', methods=['DELETE'])
 @jwt_required()  # Requires authentication
 def delete_payment(store_id, payment_id):
@@ -783,7 +738,7 @@ def add_product(id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-################################################ROUTES FOR EDITING/UPDATING PRODUCTS---------TO BE TESTED---------------(CLERK ONLY)###############################################################################################
+################################################ROUTES FOR EDITING/UPDATING PRODUCTS---------(WORKS)---------------(CLERK ONLY)###############################################################################################
 @app.route('/stores/<int:id>/products/<int:product_id>', methods=['PATCH'])
 @jwt_required()
 def update_product(id, product_id):
@@ -818,7 +773,8 @@ def update_product(id, product_id):
     if 'sales' in data:
         product.sales = data['sales']
     if 'sales_date' in data:
-        product.sales_date = datetime.strptime(data['sales_date'], '%Y-%m-%dT%H:%M:%S')
+        product.sales_date = datetime.strptime(data['sales_date'], '%Y-%m-%d')
+
     
     db.session.commit()
     
@@ -893,56 +849,57 @@ def add_request(id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-###########################################ROUTE FOR EDITING/UPDATING REQUEST(CLERK AND ADMIN ONLY)---------TO BE TESTED---------------############################################################################################
+###########################################ROUTE FOR EDITING/UPDATING REQUEST(CLERK AND ADMIN ONLY)---------(WORKS)---------------############################################################################################
     
 @app.route('/stores/<int:store_id>/requests/<int:request_id>', methods=['PATCH'])
 @jwt_required()  # Requires authentication
 def update_request(store_id, request_id):
     current_user = get_jwt_identity()
     
-    # Check if the user is authenticated as a clerk
-    if current_user['role'] != ['clerk', 'admin']:
+    # Check if the user is authenticated as a clerk or admin
+    if current_user['role'] not in ['clerk', 'admin']:
         return jsonify({"message": "Unauthorized"}), 401
     
     # Extract request data from the JSON payload
     data = request.json
     
     # Retrieve the request to be updated
-    request = Request.query.filter_by(id=request_id, store_id=store_id).first()
+    req = Request.query.filter_by(id=request_id, store_id=store_id).first()
     
-    if not request:
+    if not req:
         return jsonify({'error': 'Request not found'}), 404
 
     # Update the fields if present in the request data
     if 'product_id' in data:
-        request.product_id = data['product_id']
+        req.product_id = data['product_id']
     if 'quantity' in data:
-        request.quantity = data['quantity']
+        req.quantity = data['quantity']
     if 'requester_name' in data:
-        request.requester_name = data['requester_name']
+        req.requester_name = data['requester_name']
     if 'requester_contact' in data:
-        request.requester_contact = data['requester_contact']
+        req.requester_contact = data['requester_contact']
     if 'status' in data:
-        request.status = data['status']
+        req.status = data['status']
     
     # Commit the changes to the database
     db.session.commit()
     
     updated_request_info = {
-        'id': request.id,
-        'store_id': request.store_id,
-        'product_id': request.product_id,
-        'quantity': request.quantity,
-        'requester_name': request.requester_name,
-        'requester_contact': request.requester_contact,
-        'status': request.status
+        'id': req.id,
+        'store_id': req.store_id,
+        'product_id': req.product_id,
+        'quantity': req.quantity,
+        'requester_name': req.requester_name,
+        'requester_contact': req.requester_contact,
+        'status': req.status
     }
 
     return jsonify({'message': 'Request updated successfully', 'request': updated_request_info}), 200
 
 
+
     
-###############################################################ROUTE FOR DELETING PRODUCTS(CLERK ONLY) ---------TO BE TESTED--------------#######################################################################
+###############################################################ROUTE FOR DELETING PRODUCTS(CLERK ONLY) ---------(WORKS)--------------#######################################################################
 @app.route('/stores/<int:id>/product/<int:product_id>', methods=['DELETE'])
 @jwt_required()
 def delete_product(id, product_id):
@@ -960,7 +917,7 @@ def delete_product(id, product_id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-################################################ROUTES FOR DELETING REQUESTS(CLERK ONLY)---------TO BE TESTED--------------###################################################################################################
+################################################ROUTES FOR DELETING REQUESTS(CLERK ONLY)---------(WORKS)--------------###################################################################################################
 @app.route('/stores/<int:id>/request/<int:request_id>', methods=['DELETE'])
 @jwt_required()
 def delete_request(id, request_id):
@@ -985,4 +942,5 @@ def delete_request(id, request_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port = 3000)
+    
