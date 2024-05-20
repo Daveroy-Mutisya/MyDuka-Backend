@@ -86,14 +86,14 @@ Here's the categorized list of routes in the specified README format:
 
 ### Authentication
 **User Model:**
-- POST /register-admin: Initialize the registration process for an admin (superuser only).
+- POST /register-admin: Initialize the registration process for an admin (superuser only).-->Done
 - POST /register-clerk: Register a new clerk (admin only).
-- POST /signin: Sign in with email and password. Returns access and refresh tokens.
+- POST /signin: Sign in with email and password. Returns access and refresh tokens.-->Done
 
 ### Employees
 **User Model:**
-- GET /admins: Retrieve all admin users (superuser only).
-- POST /admins: Create a new admin user (superuser only).
+- GET /admins: Retrieve all admin users (superuser only).-->Done
+- POST /admins: Create a new admin user (superuser only).-->Done
 - GET /clerks: Retrieve all clerk users (admin only).
 - POST /clerks: Create a new clerk user (admin only).
 - GET /user/{id}: Retrieve a user by ID (admin or self only).
@@ -102,12 +102,12 @@ Here's the categorized list of routes in the specified README format:
 
 ### Dashboard (Clerk)
 **Product and Request model:**
-- GET /dashboard: Retrieve dashboard details (clerk only).
-- POST /requests: Make a product supply request (clerk only).
+- GET /clerkpanel: Retrieve product and request details (clerk only).
+- POST /requests: Make a product and supply request (clerk only).
 
 ### Store Admin
 **Store Model:**
-- GET /dashboard: Retrieve dashboard details (store admin only).
+- GET /adminpanel: Retrieve Store, Product and Request details (store admin only).
 - GET /reports: Retrieve detailed reports on individual entries (store admin only).
 - PATCH /requests/{request_id}: Approve or decline supply requests from clerks (store admin only).
 - PATCH /payments/{payment_id}: Change payment status to paid for unpaid products (store admin only).
@@ -115,9 +115,9 @@ Here's the categorized list of routes in the specified README format:
 
 ### Merchant
 **User Model:**
-- GET /admins: Retrieve all admin users (merchant only).
-- POST /admins: Create a new admin user (merchant only).
+- GET /admins: Retrieve all admin users (merchant only). -->Done
+- POST /admins: Create a new admin user (merchant only). -->Done
 **Store Model:**
-- GET /store-reports: Retrieve store-by-store reports in well-visualized graphs (merchant only).
-- GET /store/{store_id}/performance: Retrieve individual store performance, including individual product performance (merchant only).
-- GET /store/{store_id}/payments: Retrieve paid and unpaid products for each store (merchant only).
+- GET /store-reports: Retrieve store-by-store reports in well-visualized graphs (merchant only).-->Done
+- GET /store/{store_id}/performance: Retrieve individual store performance, including individual product performance (merchant only).-->Done
+- GET /store/{store_id}/payments: Retrieve paid and unpaid products for each store (merchant only).-->Done
