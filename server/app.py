@@ -638,15 +638,12 @@ def create_payment(store_id):
 def edit_payment(store_id, payment_id):
     current_user = get_jwt_identity()
 
-    if current_user['role'] not in ['admin']:
+    if current_user['role'] != 'admin':
         return jsonify({'error': 'Unauthorized'}), 401
 
     store = Store.query.get(store_id)
     if not store:
         return jsonify({'error': 'Store not found'}), 404
-
-    if current_user['role'] == 'admin' and store.user_id != current_user['id']:
-        return jsonify({'error': 'Unauthorized'}), 401
 
     payment = Payment.query.get(payment_id)
     if not payment or payment.store_id != store_id:
@@ -664,6 +661,7 @@ def edit_payment(store_id, payment_id):
     db.session.commit()
 
     return jsonify({'message': 'Payment updated successfully'}), 200
+
 
 ###############################ROUTE FOR DELETING A PAYMENT #######(ADMIN ONLY)---------TO BE TESTED--------------########################################################################
 @app.route('/store/<int:store_id>/payments/<int:payment_id>', methods=['DELETE'])
@@ -984,4 +982,5 @@ def delete_request(id, request_id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port = 3000)
+    
