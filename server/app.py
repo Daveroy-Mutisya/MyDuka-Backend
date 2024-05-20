@@ -402,7 +402,7 @@ def register_clerk():
 
 ####################################### ROUTES FOR STORES (MERCHANT ONLY) --------WORKS-------##############################################################################################
 
-@app.route('/stores', methods=['GET'])
+@app.route('/stores/', methods=['GET'])
 @jwt_required()  # Requires authentication
 def get_stores():
     current_user = get_jwt_identity()
@@ -429,7 +429,7 @@ def get_stores():
     
     return jsonify({'stores': stores_list}), 200
 
-####################################ROUTE FOR CREATING A STORE(MERCHANT ONLY)######################################---------WORKS--------------###########
+####################################ROUTE FOR CREATING A STORE(MERCHANT ONLY)######################################---------WORKS--------------#####################################################
 # Add store (POST)
 @app.route('/stores', methods=['POST'])
 @jwt_required()
@@ -451,7 +451,7 @@ def create_store():
 
     return jsonify({'message': 'Store created successfully'}), 201
 
-###############################################ROUTE FOR EDITING A STORE(MERCHANT ONLY)###################---------WORKS--------------###########################################
+###############################################ROUTE FOR EDITING A STORE(MERCHANT ONLY)###################---------WORKS--------------##############################################################################
 # Edit store (PATCH)
 @app.route('/stores/<int:store_id>', methods=['PATCH'])
 @jwt_required()
@@ -481,6 +481,9 @@ def edit_store(store_id):
 @jwt_required()
 def delete_store(store_id):
     current_user = get_jwt_identity()
+    if current_user['role'] != 'merchant':
+        return jsonify({'error': 'Unauthorized'}), 401
+    
     store = Store.query.filter_by(id=store_id, user_id=current_user['id']).first()
     if not store:
         return jsonify({'error': 'Store not found'}), 404
