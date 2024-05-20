@@ -632,7 +632,7 @@ def create_payment(store_id):
 
     return jsonify({'message': 'Payment created successfully'}), 201
 
-#########################################################ROUTE FOR  EDITING A PAYMENT ############(ADMIN ONLY)---------TO BE TESTED--------------###################################################
+#########################################################ROUTE FOR  EDITING A PAYMENT ############(ADMIN ONLY)---------(WORKS)--------------###################################################
 @app.route('/store/<int:store_id>/payments/<int:payment_id>', methods=['PATCH'])
 @jwt_required()  # Requires authentication
 def edit_payment(store_id, payment_id):
@@ -663,7 +663,7 @@ def edit_payment(store_id, payment_id):
     return jsonify({'message': 'Payment updated successfully'}), 200
 
 
-###############################ROUTE FOR DELETING A PAYMENT #######(ADMIN ONLY)---------TO BE TESTED--------------########################################################################
+###############################ROUTE FOR DELETING A PAYMENT #######(ADMIN ONLY)---------(Works)--------------########################################################################
 @app.route('/store/<int:store_id>/payments/<int:payment_id>', methods=['DELETE'])
 @jwt_required()  # Requires authentication
 def delete_payment(store_id, payment_id):
@@ -780,7 +780,7 @@ def add_product(id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-################################################ROUTES FOR EDITING/UPDATING PRODUCTS---------TO BE TESTED---------------(CLERK ONLY)###############################################################################################
+################################################ROUTES FOR EDITING/UPDATING PRODUCTS---------(WORKS)---------------(CLERK ONLY)###############################################################################################
 @app.route('/stores/<int:id>/products/<int:product_id>', methods=['PATCH'])
 @jwt_required()
 def update_product(id, product_id):
@@ -815,7 +815,8 @@ def update_product(id, product_id):
     if 'sales' in data:
         product.sales = data['sales']
     if 'sales_date' in data:
-        product.sales_date = datetime.strptime(data['sales_date'], '%Y-%m-%dT%H:%M:%S')
+        product.sales_date = datetime.strptime(data['sales_date'], '%Y-%m-%d')
+
     
     db.session.commit()
     
