@@ -592,7 +592,7 @@ def get_store_payments(store_id):
     }
 
     return jsonify(response_data), 200
-############################################## ROUTE TO CREATE A PAYMENT#####################(ADMIN ONLY)---------TO BE TESTED--------------######################################
+############################################## ROUTE TO CREATE A PAYMENT#####################(ADMIN ONLY)---------(WORKS)--------------######################################||||||\|||||||||||||3\\\\\\\
 @app.route('/store/<int:store_id>/payments', methods=['POST'])
 @jwt_required()  # Requires authentication
 def create_payment(store_id):
@@ -622,7 +622,6 @@ def create_payment(store_id):
     new_payment = Payment(
         store_id=store_id,
         product_name=product_name,
-        status=PaymentStatus(status),
         amount=amount,
         method=method,
         due_date=datetime.strptime(due_date, '%Y-%m-%d').date()
