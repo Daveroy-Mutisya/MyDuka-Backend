@@ -77,18 +77,11 @@ class Login(Resource):
         if not user:
             return {"error": "User does not exist"}, 401
 
-        try:
-            if not bcrypt.check_password_hash(user.password, password):
-                return {"error": "Incorrect password"}, 401
-        except ValueError:  # Handle "Invalid salt" error
-            # Reset password to a new secure one
-            new_password = generate_secure_password()  # Replace this with your password generation logic
-            user.password = bcrypt.generate_password_hash(new_password).decode('utf-8')
-            db.session.commit()
-            return {"error": "Password reset. Please check your email for the new password."}, 500
+        if not bcrypt.check_password_hash(user.password, password):
+            return {"error": "Incorrect password"}, 401
 
-        access_token = create_access_token(identity={'id': user.id, 'role': user.role})
-        refresh_token = create_refresh_token(identity={'id': user.id, 'role': user.role})
+        access_token = create_access_token(identity={'email': user.email, 'role': user.role})
+        refresh_token = create_refresh_token(identity={'email': user.email, 'role': user.role})
         return {"access_token": access_token, "refresh_token": refresh_token}, 200
 
 api.add_resource(Login, '/login')
@@ -262,105 +255,70 @@ def get_admins():
 
 #############################################################################################################################################################
 
-####################################### DAVE ROUTE FOR DEACTIVATION AND REACTIVATION OF ADMINS MERCHANT ONLY(DOESN'T WORK)##############################################################################################
+####################################### DAVE ROUTE FOR DEACTIVATION AND REACTIVATION OF ADMINS MERCHANT ONLY(WORKS)##############################################################################################
 
 
-# @app.before_request
-# def check_if_user_is_active():
-#     if request.endpoint not in ('login', 'register', 'static'):  # Add non-protected endpoints as needed
-#         try:
-#             verify_jwt_in_request()
-#             current_user_identity = get_jwt_identity()
-#             user = User.query.filter_by(email=current_user_identity).first()
-#             if user and not user.active:
-#                 return jsonify({'error': 'User account is deactivated'}), 401
-#         except:
-#             pass 
+@app.before_request
+def check_if_user_is_active():
+    if request.endpoint not in ('login', 'register', 'static'):
+        try:
+            verify_jwt_in_request()
+            current_user_identity = get_jwt_identity()
+            if isinstance(current_user_identity, dict) and 'email' in current_user_identity:
+                user = User.query.filter_by(email=current_user_identity['email']).first()
+                if user and not user.active:
+                    return jsonify({'error': 'User account is deactivated'}), 401
+        except Exception as e:
+            pass  # Handle token verification exceptions if necessary
+         
 
-# @app.route('/admin/<int:id>/deactivate', methods=['PATCH'])
-# @jwt_required()  # Requires authentication
-# def deactivate_admin(id):
-#     current_user_identity = get_jwt_identity()
+
+@app.route('/admin/<int:id>/deactivate', methods=['PATCH'])
+@jwt_required()  # Requires authentication
+def deactivate_admin(id):
+    current_user_identity = get_jwt_identity()
     
-#     # Print out the current user identity for debugging
-#     print("Current User Identity:", current_user_identity)
+    # Check if the required keys exist in the identity
+    if not isinstance(current_user_identity, dict) or 'role' not in current_user_identity:
+        return jsonify({'error': 'Invalid token structure'}), 400
 
-#     # Check if the required keys exist in the identity
-#     if 'email' not in current_user_identity or 'role' not in current_user_identity:
-#         return jsonify({'error': 'Invalid token structure'}), 400
+    current_user_role = current_user_identity['role']  # Extract the role from the identity
 
-#     current_user_role = current_user_identity['role']  # Extract the role from the identity
-
-#     if current_user_role != 'merchant':
-#         return jsonify({'error': 'Unauthorized'}), 401
-
-#     admin = models.User.query.get(id)
-#     if not admin:
-#         return jsonify({'error': 'Admin not found'}), 404
-
-#     try:
-#         # Implement deactivation logic
-#         admin.active = False
-#         models.db.session.commit()
-#         return jsonify({'message': 'Admin account deactivated successfully'}), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-
-
-# @app.route('/admin/<int:id>/reactivate', methods=['PATCH'])
-# @jwt_required()  # Requires authentication
-# def reactivate_admin(id):
-#     current_user_identity = get_jwt_identity()
-
-#     # Check if the required keys exist in the identity
-#     if 'email' not in current_user_identity or 'role' not in current_user_identity:
-#         return jsonify({'error': 'Invalid token structure'}), 400
-
-#     current_user_role = current_user_identity['role']  # Extract the role from the identity
-
-#     if current_user_role != 'merchant':
-#         return jsonify({'error': 'Unauthorized'}), 401
-
-#     admin = models.User.query.get(id)
-#     if not admin:
-#         return jsonify({'error': 'Admin not found'}), 404
-
-#     try:
-#         # Implement reactivation logic
-#         admin.active = True
-#         models.db.session.commit()
-#         return jsonify({'message': 'Admin account reactivated successfully'}), 200
-#     except Exception as e:
-#         return jsonify({'error': str(e)}), 500
-
-##########################################################################################################################################################################
-
-####################################### ROUTE FOR DELETING ADMINS(MERCHANT ONLY) ----WORKS-----------------##############################################################################################
-
-# Route for deleting admin accounts
-@app.route('/admin/<int:id>', methods=['DELETE'])
-@jwt_required()  
-def delete_admin(id):
-    current_user = get_jwt_identity()
-    if current_user['role'] != 'merchant':
+    if current_user_role != 'merchant':
         return jsonify({'error': 'Unauthorized'}), 401
 
     admin = User.query.get(id)
     if not admin:
         return jsonify({'error': 'Admin not found'}), 404
 
-    # Check if the admin is the superuser, if yes, prevent deletion
-    if admin.email == 'myduka7@gmail.com':
-        return jsonify({'error': 'Cannot delete superuser account'}), 403
+    try:
+        admin.active = False
+        db.session.commit()
+        return jsonify({'message': 'Admin account deactivated successfully'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/admin/<int:id>/reactivate', methods=['PATCH'])
+@jwt_required()  # Requires authentication
+def reactivate_admin(id):
+    current_user_identity = get_jwt_identity()
+
+    if not isinstance(current_user_identity, dict) or 'role' not in current_user_identity:
+        return jsonify({'error': 'Invalid token structure'}), 400
+
+    current_user_role = current_user_identity['role']  # Extract the role from the identity
+
+    if current_user_role != 'merchant':
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    admin = User.query.get(id)
+    if not admin:
+        return jsonify({'error': 'Admin not found'}), 404
 
     try:
-        # Implement deletion logic
-        db.session.delete(admin)
-
+        admin.active = True
         db.session.commit()
-
-        return jsonify({'message': 'Admin account deleted successfully'}), 200
+        return jsonify({'message': 'Admin account reactivated successfully'}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
