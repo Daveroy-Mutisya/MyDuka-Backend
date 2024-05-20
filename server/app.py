@@ -475,7 +475,7 @@ def edit_store(store_id):
 
     return jsonify({'message': 'Store updated successfully'}), 200
 
-########################################ROUTE FOR DELETING A STORE (MERCHANT ONLY)############################################---------TO BE TESTED--------------###############################
+########################################ROUTE FOR DELETING A STORE (MERCHANT ONLY)############################################---------(WORKS)--------------###############################
 # Delete store (DELETE)
 @app.route('/stores/<int:store_id>', methods=['DELETE'])
 @jwt_required()
@@ -891,56 +891,57 @@ def add_request(id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-###########################################ROUTE FOR EDITING/UPDATING REQUEST(CLERK AND ADMIN ONLY)---------TO BE TESTED---------------############################################################################################
+###########################################ROUTE FOR EDITING/UPDATING REQUEST(CLERK AND ADMIN ONLY)---------(WORKS)---------------############################################################################################
     
 @app.route('/stores/<int:store_id>/requests/<int:request_id>', methods=['PATCH'])
 @jwt_required()  # Requires authentication
 def update_request(store_id, request_id):
     current_user = get_jwt_identity()
     
-    # Check if the user is authenticated as a clerk
-    if current_user['role'] != ['clerk', 'admin']:
+    # Check if the user is authenticated as a clerk or admin
+    if current_user['role'] not in ['clerk', 'admin']:
         return jsonify({"message": "Unauthorized"}), 401
     
     # Extract request data from the JSON payload
     data = request.json
     
     # Retrieve the request to be updated
-    request = Request.query.filter_by(id=request_id, store_id=store_id).first()
+    req = Request.query.filter_by(id=request_id, store_id=store_id).first()
     
-    if not request:
+    if not req:
         return jsonify({'error': 'Request not found'}), 404
 
     # Update the fields if present in the request data
     if 'product_id' in data:
-        request.product_id = data['product_id']
+        req.product_id = data['product_id']
     if 'quantity' in data:
-        request.quantity = data['quantity']
+        req.quantity = data['quantity']
     if 'requester_name' in data:
-        request.requester_name = data['requester_name']
+        req.requester_name = data['requester_name']
     if 'requester_contact' in data:
-        request.requester_contact = data['requester_contact']
+        req.requester_contact = data['requester_contact']
     if 'status' in data:
-        request.status = data['status']
+        req.status = data['status']
     
     # Commit the changes to the database
     db.session.commit()
     
     updated_request_info = {
-        'id': request.id,
-        'store_id': request.store_id,
-        'product_id': request.product_id,
-        'quantity': request.quantity,
-        'requester_name': request.requester_name,
-        'requester_contact': request.requester_contact,
-        'status': request.status
+        'id': req.id,
+        'store_id': req.store_id,
+        'product_id': req.product_id,
+        'quantity': req.quantity,
+        'requester_name': req.requester_name,
+        'requester_contact': req.requester_contact,
+        'status': req.status
     }
 
     return jsonify({'message': 'Request updated successfully', 'request': updated_request_info}), 200
 
 
+
     
-###############################################################ROUTE FOR DELETING PRODUCTS(CLERK ONLY) ---------TO BE TESTED--------------#######################################################################
+###############################################################ROUTE FOR DELETING PRODUCTS(CLERK ONLY) ---------(WORKS)--------------#######################################################################
 @app.route('/stores/<int:id>/product/<int:product_id>', methods=['DELETE'])
 @jwt_required()
 def delete_product(id, product_id):
@@ -958,7 +959,7 @@ def delete_product(id, product_id):
     else:
         return jsonify({"message": "Unauthorized"}), 401
 
-################################################ROUTES FOR DELETING REQUESTS(CLERK ONLY)---------TO BE TESTED--------------###################################################################################################
+################################################ROUTES FOR DELETING REQUESTS(CLERK ONLY)---------(WORKS)--------------###################################################################################################
 @app.route('/stores/<int:id>/request/<int:request_id>', methods=['DELETE'])
 @jwt_required()
 def delete_request(id, request_id):
