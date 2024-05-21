@@ -1,3 +1,0 @@
-flask_sqlalchemy
-marshmallow-sqlalchemy
-flask_jwt_extended
